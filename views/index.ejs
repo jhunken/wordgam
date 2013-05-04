@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>wordgam</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script>
+
+    </script>
+
+</head>
+<body onload="init()">
+
+    <div id="draggableDiv" onmousedown="dragger.startMoving(event);" onmouseup="dragger.stopMoving(event);">
+        <h3><%= data[0].word %></h3>
+    </div>
+
+    <div id="shuffle">
+        <div id="def1" class="droppable" data-word="<%=data[0].word %>">
+            <p><%= data[0].definition %></p>
+        </div>
+        <div id="def2" class="droppable" data-word="<%=data[1].word %>">
+            <p><%= data[1].definition %></p>
+        </div>
+        <div id="def3" class="droppable" data-word="<%=data[2].word %>">
+            <p><%= data[2].definition %></p>
+        </div>
+    </div>
+    <a href="#modal" style="display: none" id="openModal"></a>
+    <script>
+
+        function $(el) {
+            return document.getElementById(el);
+        }
+        function inDiv(evt, targetId) {
+            //check if event xy is within target div xy
+            var targetElem = $(targetId);
+            var rect = targetElem.getBoundingClientRect();
+            if (evt.clientX >= rect.left && evt.clientX <= rect.right && evt.clientY >= rect.top && evt.clientY <= rect.bottom) {
+                return true;
+            }
+            return false;
+        }
+        function isCorrectDef(targetId) {
+
+            var targetObj = $(targetId);
+            var targetWord = targetObj.getAttributeNode('data-word');
+            if (targetWord.nodeValue == "<%=data[0].word %>") {
+                return true;
+            };
+
+            return false;
+        }
+        function reload() {
+            var cachebuster = Math.round(new Date().getTime() / 1000);
+            var url = window.location.href.split('?')[0];
+            window.location.href = url + "?cb=" + cachebuster;
+        }
+
+        function touchHandler(event) {
+            var touches = event.changedTouches,
+               first = touches[0],
+               type = "";
+
+            switch (event.type) {
+                case "touchstart": type = "mousedown"; break;
+                case "touchmove": type = "mousemove"; break;
+                case "touchend": type = "mouseup"; break;
+                default: return;
+            }
+            var simulatedEvent = document.createEvent("MouseEvent");
+            simulatedEvent.initMouseEvent(type, true, true, window, 1,
+                                      first.screenX, first.screenY,
+                                      first.clientX, first.clientY, false,
+                                      false, false, false, 0/*left*/, null);
+
+            first.target.dispatchEvent(simulatedEvent);
+            event.preventDefault();
+        }
+
+        function init() {
+            document.addEventListener("touchstart", touchHandler, true);
+            document.addEventListener("touchmove", touchHandler, true);
+            document.addEventListener("touchend", touchHandler, true);
+            document.addEventListener("touchcancel", touchHandler, true);
+            var modal = $('openModal');
+            modal.click();
+        }
+        var dragger = function () {
+            return {
+                // Here we start of with the main functions
+                startMoving: function (evt) { // The function that sets up the div coordinates to make it move. Executed on the onmousedown event on the div.
+                    evt = evt || window.event;
+                    var posX = evt.clientX,
+                    posY = evt.clientY,
+                    a = $('draggableDiv'),
+                    divTop = a.style.top,
+                    divLeft = a.style.left;
+                    divTop = divTop.replace('px', '');
+                    divLeft = divLeft.replace('px', '');
+                    var diffX = posX - divLeft,
+                    diffY = posY - divTop;
+                    document.onmousemove = function (evt) {
+                        evt = evt || window.event;
+                        var posX = evt.clientX,
+                        posY = evt.clientY,
+                        aX = posX - diffX,
+                        aY = posY - diffY;
+                        dragger.move('draggableDiv', aX, aY);
+                    }
+                },
+                stopMoving: function (evt) { // This function gets executed when the user leaves the div alone. Changed the value of the onmousemove attribute.
+                    document.onmousemove = function () { }
+                    //check if we landed in any of the divs
+                    evt = (evt || event);
+                    if (inDiv(evt, 'def1')) {
+                        var div = $('def1');
+                        if (isCorrectDef('def1')) {
+                            div.className += " animated tada";
+                            setTimeout(reload, 500);
+
+                        } else {
+                            div.className += "animated bounceOutUp ";
+                        }
+                    } else if (inDiv(evt, 'def2')) {
+                        var div = $('def2');
+                        if (isCorrectDef('def2')) {
+                            div.className += " animated tada";
+                            setTimeout(reload, 500);
+                        } else {
+
+                            div.className += " animated bounceOutUp";
+
+                        }
+                    } else if (inDiv(evt, 'def3')) {
+                        var div = $('def3');
+                        if (isCorrectDef('def3')) {
+                            div.className += " animated tada";
+                            setTimeout(reload, 500);
+                        } else {
+
+                            div.className += " animated bounceOutUp";
+
+                        }
+                    }
+
+
+                },
+                move: function (divid, xpos, ypos) { // Function to assign the style rules to the element
+                    var a = $(divid);
+                    $(divid).style.left = xpos + 'px';
+                    $(divid).style.top = ypos + 'px';
+                }
+            }
+        }();
+
+        function shuffle(elems) {
+
+            allElems = (function () {
+                var ret = [], l = elems.length;
+                while (l--) { ret[ret.length] = elems[l]; }
+                return ret;
+            })();
+
+            var shuffled = (function () {
+                var l = allElems.length, ret = [];
+                while (l--) {
+                    var random = Math.floor(Math.random() * allElems.length),
+                        randEl = allElems[random].cloneNode(true);
+                    allElems.splice(random, 1);
+                    ret[ret.length] = randEl;
+                }
+                return ret;
+            })(), l = elems.length;
+
+            while (l--) {
+                elems[l].parentNode.insertBefore(shuffled[l], elems[l].nextSibling);
+                elems[l].parentNode.removeChild(elems[l]);
+            }
+
+        }
+
+
+
+        window.addEventListener("load", function () {
+            // Set a timeout...
+            setTimeout(function () {
+                // Hide the address bar!
+                window.scrollTo(0, 1);
+            }, 0);
+        });
+        shuffle(document.getElementsByClassName('droppable'));
+    </script>
+</body>
+</html>

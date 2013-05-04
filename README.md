@@ -1,4 +1,5 @@
-wordgam
-=======
+﻿var api_key = 'yourWordnikApiKeyHere';
 
-simple word game using the wordnik api
+module.exports = {
+    api_key: api_key
+}
