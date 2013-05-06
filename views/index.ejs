@@ -26,7 +26,7 @@
             <p><%= data[2].definition %></p>
         </div>
     </div>
-    <a href="#modal" style="display: none" id="openModal"></a>
+    
     <script>
 
         function $(el) {
@@ -83,8 +83,7 @@
             document.addEventListener("touchmove", touchHandler, true);
             document.addEventListener("touchend", touchHandler, true);
             document.addEventListener("touchcancel", touchHandler, true);
-            var modal = $('openModal');
-            modal.click();
+           
         }
         var dragger = function () {
             return {
@@ -180,15 +179,6 @@
 
         }
 
-
-
-        window.addEventListener("load", function () {
-            // Set a timeout...
-            setTimeout(function () {
-                // Hide the address bar!
-                window.scrollTo(0, 1);
-            }, 0);
-        });
         shuffle(document.getElementsByClassName('droppable'));
     </script>
 </body>
